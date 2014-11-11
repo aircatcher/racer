@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="./phaser.js" type="text/javascript" onerror="alert(1)"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        var game = {
+            projection : function() {}
+        };
+
+        var Player = function() {
+
+        };
+
+        var Road = function() {
+            this.segments = [];
+            for(var i = 0; i < this.segmentsCount; i++) {
+                this.segments.push({});
+            }
+        };
+
+        Road.prototype = {
+            segmentsCount : 500
+        }
+
+        var racer = {
+            preload : function() {
+                game.load.image("background-hills", "javascript-racer-master/images/background/hills.png");
+                game.load.image("background-sky", "javascript-racer-master/images/background/sky.png");
+                game.load.image("background-trees", "javascript-racer-master/images/background/trees.png");
+                game.load.image("player-left", "javascript-racer-master/images/sprites/player_left.png");
+                game.load.image("player-right", "javascript-racer-master/images/sprites/player_right.png");
+                game.load.image("player-straight", "javascript-racer-master/images/sprites/player_straight.png");
+            },
+            create : function() {
+                game.add.sprite(0, 0, "background-sky");
+                game.add.sprite(0, 0, "background-hills");
+                game.add.sprite(0, 0, "background-trees");
+            },
+            update : function() {},
+            project : function() {}
+        }
+
+        var game = new Phaser.Game(640, 480, Phaser.AUTO, '', {
+            preload : racer.preload,
+            create : racer.create,
+            update : racer.update
+        });
+    </script>
+</body>
+</html>
