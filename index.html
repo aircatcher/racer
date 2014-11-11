@@ -6,7 +6,9 @@
 <body>
     <script type="text/javascript">
         var game = {
-            projection : function() {}
+            project : function(x, y, z) {
+
+            }
         };
 
         var Player = function() {
@@ -16,12 +18,29 @@
         var Road = function() {
             this.segments = [];
             for(var i = 0; i < this.segmentsCount; i++) {
-                this.segments.push({});
+                this.segments.push({
+                    z : this.segmentGap * i,
+                    color : i % 2 ? this.colors.light : this.colors.dark
+                });
             }
         };
 
         Road.prototype = {
-            segmentsCount : 500
+            segmentCount : 500,
+            segmentGap : 200,
+            colors : {
+                light : {
+                    road : '#6B6B6B',
+                    grass : '#10AA10',
+                    rumble : '#555555',
+                    lane : '#CCCCCC'
+                },
+                dark : {
+                    road : '#696969',
+                    grass : '#009A00',
+                    rumble : '#BBBBBB'
+                }
+            }
         }
 
         var racer = {
