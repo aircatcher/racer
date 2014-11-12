@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="./phaser.js" type="text/javascript" onerror="alert(1)"></script>
+    <script src="./phaser.js" type="text/javascript"></script>
 </head>
 <body>
     <script type="text/javascript">
-        var game = {
-            project : function(x, y, z) {
-
-            }
-        };
-
         var Player = function() {
-
+            this.x = 0;
+            this.y = 0;
+            this.z = 0;
         };
 
         var Road = function() {
@@ -26,8 +22,10 @@
         };
 
         Road.prototype = {
+            width : 2000,
             segmentCount : 500,
             segmentGap : 200,
+            lanes : 3,
             colors : {
                 light : {
                     road : '#6B6B6B',
@@ -43,29 +41,52 @@
             }
         }
 
-        var racer = {
-            preload : function() {
-                game.load.image("background-hills", "javascript-racer-master/images/background/hills.png");
-                game.load.image("background-sky", "javascript-racer-master/images/background/sky.png");
-                game.load.image("background-trees", "javascript-racer-master/images/background/trees.png");
-                game.load.image("player-left", "javascript-racer-master/images/sprites/player_left.png");
-                game.load.image("player-right", "javascript-racer-master/images/sprites/player_right.png");
-                game.load.image("player-straight", "javascript-racer-master/images/sprites/player_straight.png");
-            },
-            create : function() {
-                game.add.sprite(0, 0, "background-sky");
-                game.add.sprite(0, 0, "background-hills");
-                game.add.sprite(0, 0, "background-trees");
-            },
-            update : function() {},
-            project : function() {}
+        function Racer(opts) {
+            this.fieldOfView = 100;
+            this.scale = 1 / Math.tan(this.fieldOfView / 2 / 180 * Math.PI);
+            this.player = new Player();
+            this.road = new Road();
+            this.engine = new Phaser.Game(this.canvasWidth, this.canvasHeight, Phaser.AUTO, "racer");
+            this.engine.state.add("racer", this, true);
         }
 
-        var game = new Phaser.Game(640, 480, Phaser.AUTO, '', {
-            preload : racer.preload,
-            create : racer.create,
-            update : racer.update
-        });
+        Racer.prototype = {
+            canvasWidth : 640,
+
+            canvasHeight : 480,
+
+            cameraX : 0,
+
+            cameraY : 2000,
+
+            cameraZ : 0,
+
+            project : function(x, y, z) {
+                // this.cameraY / screenY = z / this.scale;
+                // x / scrennX = z / this.scale;
+                return {
+                    screenX : x / z * this.scale,
+                    screenY : this.cameraY / z * this.scale
+                }
+            },
+
+            preload : function() {
+                this.engine.load.image("background-hills", "javascript-racer-master/images/background/hills.png");
+                this.engine.load.image("background-sky", "javascript-racer-master/images/background/sky.png");
+                this.engine.load.image("background-trees", "javascript-racer-master/images/background/trees.png");
+                this.engine.load.image("player-left", "javascript-racer-master/images/sprites/player_left.png");
+                this.engine.load.image("player-right", "javascript-racer-master/images/sprites/player_right.png");
+                this.engine.load.image("player-straight", "javascript-racer-master/images/sprites/player_straight.png");
+            },
+
+            create : function() {
+                this.engine.add.sprite(0, 0, "background-sky");
+                this.engine.add.sprite(0, 0, "background-hills");
+                this.engine.add.sprite(0, 0, "background-trees");
+            }
+        };
+
+        var racer = new Racer();
     </script>
 </body>
 </html>
