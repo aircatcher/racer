@@ -5,10 +5,10 @@
 </head>
 <body>
     <script type="text/javascript">
-        var Player = function() {
-            this.x = 0;
-            this.y = 0;
-            this.z = 0;
+        var Player = function(opts) {
+            this.x = opts.x || 0;
+            this.y = opts.y || 0;
+            this.z = opts.z || 0;
         };
 
         var Road = function() {
@@ -44,7 +44,7 @@
         function Racer(opts) {
             this.fieldOfView = 100;
             this.scale = 1 / Math.tan(this.fieldOfView / 2 / 180 * Math.PI);
-            this.player = new Player();
+            this.player = new Player(0, 0, this.scale * this.cameraY);
             this.road = new Road();
             this.engine = new Phaser.Game(this.canvasWidth, this.canvasHeight, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
@@ -65,8 +65,8 @@
                 // this.cameraY / screenY = z / this.scale;
                 // x / scrennX = z / this.scale;
                 return {
-                    screenX : x / z * this.scale,
-                    screenY : this.cameraY / z * this.scale
+                    screenX : x / z * this.scale + this.canvasWidth / 2,
+                    screenY : this.cameraY / z * this.scale + this.canvasHeight / 2
                 }
             },
 
