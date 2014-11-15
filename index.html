@@ -12,40 +12,52 @@
         };
 
         var Road = function(opts) {
-            this.bitmap = opts.bitmap;
-            this.resolutionX = this.bitmap.canvas.width;
-            this.resolutionY = this.bitmap.canvas.height;
-
-            this.bitmap.ctx.fillStyle = "#000";
-            this.bitmap.ctx.fillRect(0, this.resolutionY / 2, this.resolutionX, this.resolutionY);
-
+            // 道路宽度（3d world）
+            this.width = 2000;
+            // 道路分段
             this.segments = [];
+            // 道路分段数量
+            this.segmentCount = 500;
+            // 道路分段间距
+            this.segmentGap = 200;
+            // 车道数量
+            this.lanes = 3;
+            // 道路颜色
+            this.colors = {
+                light : {road : '#6B6B6B', grass : '#10AA10', rumble : '#555555', lane : '#CCCCCC'},
+                dark : {road : '#696969', grass : '#009A00', rumble : '#BBBBBB'}
+            };
+
+            // Phaser实例
+            this.engine = opts.engine;
+            // 道路canvas，最后被画入主canvas
+            this.bitmap = this.engine.add.bitmapData(this.engine.width, this.engine.height);
+
+            // 初始化道路分段
             for(var i = 0; i < this.segmentCount; i++) {
                 this.segments.push({
                     z : this.segmentGap * i,
                     color : i % 2 ? this.colors.light : this.colors.dark
                 });
             }
+
+            // 将道路canvas加入主canvas
+            this.engine.add.image(0, 0, this.bitmap);
         };
 
         Road.prototype = {
-            width : 2000,
-            segmentCount : 500,
-            segmentGap : 200,
-            lanes : 3,
-            colors : {
-                light : {
-                    road : '#6B6B6B',
-                    grass : '#10AA10',
-                    rumble : '#555555',
-                    lane : '#CCCCCC'
-                },
-                dark : {
-                    road : '#696969',
-                    grass : '#009A00',
-                    rumble : '#BBBBBB'
+
+            project : function(x, y, z) {
+                var d = this.distCameraToScreen;
+                // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
+                // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
+                return {
+                    screenX : Math.round(d / z * (x - this.cameraX)),
+                    screenY : Math.round(d / z * (y - this.cameraY))
                 }
-            }
+            },
+
+            polygon : function() {}
         }
 
         function Racer(opts) {
@@ -53,12 +65,8 @@
             this.fieldOfView = 100 / 180 * Math.PI;
             //屏幕与眼球间的距离
             this.distCameraToScreen = this.resolutionX / 2 / Math.tan(this.fieldOfView / 2);
-            // this.player = new Player(0, 0, this.scale * this.cameraY);
-
             this.engine = new Phaser.Game(this.resolutionX, this.resolutionY, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
-            
-            console.log(this.engine);
         }
 
         Racer.prototype = {
@@ -71,27 +79,6 @@
             cameraY : 2000,
 
             cameraZ : 0,
-
-            project : function(x, y, z) {
-                var d = this.distCameraToScreen;
-                // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
-                // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
-                return {
-                    screenX : Math.round(d / z * (x - this.cameraX)),
-                    screenY : Math.round(d / z * (y - this.cameraY))
-                }
-            },
-
-            polygon: function(ctx, x1, y1, x2, y2, x3, y3, x4, y4, color) {
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.lineTo(x3, y3);
-                ctx.lineTo(x4, y4);
-                ctx.closePath();
-                ctx.fill();
-            },
 
             preload : function() {
                 this.engine.load.image("background-hills", "javascript-racer-master/images/background/hills.png");
@@ -107,13 +94,12 @@
                 this.engine.add.sprite(0, 0, "background-hills");
                 this.engine.add.sprite(0, 0, "background-trees");
 
-                this.roadBitMap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
-                this.road = new Road({bitmap : this.roadBitMap});
-                this.engine.add.image(0, 0, this.roadBitMap);
+                this.road = new Road({engine : this.engine});
+                // this.player = new Player({engine : this.engine});             
             },
 
             update : function() {
-                this.road.update();
+                // this.road.update();
             }
 
             // update : function() {
