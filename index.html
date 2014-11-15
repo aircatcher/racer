@@ -5,13 +5,13 @@
 </head>
 <body>
     <script type="text/javascript">
-        var Player = function(opts) {
-            this.x = opts.x || 0;
-            this.y = opts.y || 0;
-            this.z = opts.z || 0;
+        var Player = function() {
+            this.x = 0;
+            this.y = 0;
+            this.z = 0;
         };
 
-        var Road = function(opts) {
+        var Road = function() {
             // 道路宽度（3d world）
             this.width = 2000;
             // 道路分段
@@ -19,7 +19,7 @@
             // 道路分段数量
             this.segmentCount = 500;
             // 道路分段间距
-            this.segmentGap = 200;
+            this.segmentGap = 300;
             // 车道数量
             this.lanes = 3;
             // 道路颜色
@@ -28,11 +28,6 @@
                 dark : {road : '#696969', grass : '#009A00', rumble : '#BBBBBB'}
             };
 
-            // Phaser实例
-            this.engine = opts.engine;
-            // 道路canvas，最后被画入主canvas
-            this.bitmap = this.engine.add.bitmapData(this.engine.width, this.engine.height);
-
             // 初始化道路分段
             for(var i = 0; i < this.segmentCount; i++) {
                 this.segments.push({
@@ -40,31 +35,23 @@
                     color : i % 2 ? this.colors.light : this.colors.dark
                 });
             }
-
-            // 将道路canvas加入主canvas
-            this.engine.add.image(0, 0, this.bitmap);
         };
 
         Road.prototype = {
-
-            project : function(x, y, z) {
-                var d = this.distCameraToScreen;
-                // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
-                // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
-                return {
-                    screenX : Math.round(d / z * (x - this.cameraX)),
-                    screenY : Math.round(d / z * (y - this.cameraY))
-                }
-            },
-
-            polygon : function() {}
+            findSegmentIndex : function(z) {
+                return Math.floor(z / this.segmentGap) % this.segmentCount;
+            }
         }
 
         function Racer(opts) {
             //水平视角
-            this.fieldOfView = 100 / 180 * Math.PI;
+            this.fieldOfView = 100 * Math.PI / 180;
             //屏幕与眼球间的距离
             this.distCameraToScreen = this.resolutionX / 2 / Math.tan(this.fieldOfView / 2);
+
+            this.road = new Road();
+            this.player = new Player();
+
             this.engine = new Phaser.Game(this.resolutionX, this.resolutionY, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
         }
@@ -94,35 +81,60 @@
                 this.engine.add.sprite(0, 0, "background-hills");
                 this.engine.add.sprite(0, 0, "background-trees");
 
-                this.road = new Road({engine : this.engine});
-                // this.player = new Player({engine : this.engine});             
+                this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
+                this.roadBitmap.diry = true;
+                this.engine.add.image(0, 0, this.roadBitmap);
             },
 
             update : function() {
-                // this.road.update();
-            }
+                var i = this.road.findSegmentIndex(this.player.z);
+                console.log(i);
+                for(; i < this.road.segmentCount; i++) {
+                    var segment = this.road.segments[i],
+                        p1 = this.project(-this.road.width / 2, 0, segment.z),
+                        p2 = this.project(this.road.width / 2, 0, segment.z),
+                        p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap),
+                        p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap);
 
-            // update : function() {
-            //     var that = this;
-            //     this.road.segments.forEach(function(segment) {
-            //         var p1 = that.project(-that.road.width / 2, 0, segment.z),
-            //             p2 = that.project(-that.road.width / 2, 0, segment.z + that.road.segmentGap),
-            //             p3 = that.project(that.road.width / 2, 0, segment.z),
-            //             p4 = that.project(that.road.width / 2, 0, segment.z + that.road.segmentGap);
-            //         that.polygon(
-            //             that.engine.canvas.getContext("2d"),
-            //             p1.screenX,
-            //             p1.screenY,
-            //             p2.screenX,
-            //             p2.screenY,
-            //             p3.screenX,
-            //             p3.screenY,
-            //             p4.screenX,
-            //             p4.screenY,
-            //             segment.color.road
-            //         );
-            //     });
-            // }
+                    // if(segment.z <= this.distCameraToScreen || 
+                    //     p2.screenY > this.resolutionY) {
+                    //     continue;
+                    // }
+
+                    this.roadBitmap.ctx.fillStyle = segment.color.grass;
+                    this.roadBitmap.ctx.fillRect(0, p4.screenY, this.resolutionX, p4.screenY - p2.screenY);
+
+                    this.polygon(
+                        this.roadBitmap.ctx,
+                        p1.screenX, p1.screenY,
+                        p2.screenX, p2.screenY,
+                        p3.screenX, p3.screenY,
+                        p4.screenX, p4.screenY,
+                        segment.color.road
+                    );
+                }
+            },
+
+            // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
+            // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
+            project : function(x, y, z) {
+                var d = this.distCameraToScreen;
+                return {
+                    screenX : Math.round(this.resolutionX / 2 + d / z * (x - this.cameraX)),
+                    screenY : Math.round(this.resolutionY / 2 - d / z * (y - this.cameraY))
+                }
+            },
+
+            polygon : function(ctx, x1, y1, x2, y2, x3, y3, x4, y4, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineTo(x3, y3);
+                ctx.lineTo(x4, y4);
+                ctx.closePath();
+                ctx.fill();
+            }
         };
 
         var racer = new Racer();
