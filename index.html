@@ -2,6 +2,9 @@
 <html>
 <head>
     <script src="./phaser.js" type="text/javascript"></script>
+    <style type="text/css">
+    canvas{width:640px;height:480px;}
+    </style>
 </head>
 <body>
     <script type="text/javascript">
@@ -19,7 +22,7 @@
             // 道路分段数量
             this.segmentCount = 500;
             // 道路分段间距
-            this.segmentGap = 300;
+            this.segmentGap = 600;
             // 车道数量
             this.lanes = 3;
             // 道路颜色
@@ -32,7 +35,7 @@
             for(var i = 0; i < this.segmentCount; i++) {
                 this.segments.push({
                     z : this.segmentGap * i,
-                    color : i % 2 ? this.colors.light : this.colors.dark
+                    color : i % 2 ? this.colors.dark : this.colors.light
                 });
             }
         };
@@ -54,16 +57,18 @@
 
             this.engine = new Phaser.Game(this.resolutionX, this.resolutionY, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
+
+            console.log(this.engine);
         }
 
         Racer.prototype = {
-            resolutionX : 640,
+            resolutionX : 1024,
 
-            resolutionY : 480,
+            resolutionY : 768,
 
             cameraX : 0,
 
-            cameraY : 2000,
+            cameraY : 1000,
 
             cameraZ : 0,
 
@@ -77,9 +82,9 @@
             },
 
             create : function() {
-                this.engine.add.sprite(0, 0, "background-sky");
-                this.engine.add.sprite(0, 0, "background-hills");
-                this.engine.add.sprite(0, 0, "background-trees");
+                // this.engine.add.sprite(0, 0, "background-sky");
+                // this.engine.add.sprite(0, 0, "background-hills");
+                // this.engine.add.sprite(0, 0, "background-trees");
 
                 this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
                 this.roadBitmap.diry = true;
@@ -87,25 +92,22 @@
             },
 
             update : function() {
-                var i = this.road.findSegmentIndex(this.player.z);
-                console.log(i);
+                var ctx = this.roadBitmap.ctx;
+                var i = this.road.findSegmentIndex(this.cameraZ);
                 for(; i < this.road.segmentCount; i++) {
-                    var segment = this.road.segments[i],
+                    var segment = this.road.segments[1],
                         p1 = this.project(-this.road.width / 2, 0, segment.z),
                         p2 = this.project(this.road.width / 2, 0, segment.z),
                         p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap),
                         p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap);
 
-                    // if(segment.z <= this.distCameraToScreen || 
-                    //     p2.screenY > this.resolutionY) {
-                    //     continue;
-                    // }
+                    if(segment.z <= this.cameraZ || p3.screenY > this.resolutionY) continue;
 
-                    this.roadBitmap.ctx.fillStyle = segment.color.grass;
-                    this.roadBitmap.ctx.fillRect(0, p4.screenY, this.resolutionX, p4.screenY - p2.screenY);
+                    ctx.fillStyle = segment.color.grass;
+                    ctx.fillRect(0, p4.screenY, this.resolutionX, p1.screenY - p4.screenY);
 
                     this.polygon(
-                        this.roadBitmap.ctx,
+                        ctx,
                         p1.screenX, p1.screenY,
                         p2.screenX, p2.screenY,
                         p3.screenX, p3.screenY,
@@ -120,8 +122,8 @@
             project : function(x, y, z) {
                 var d = this.distCameraToScreen;
                 return {
-                    screenX : Math.round(this.resolutionX / 2 + d / z * (x - this.cameraX)),
-                    screenY : Math.round(this.resolutionY / 2 - d / z * (y - this.cameraY))
+                    screenX : Math.round(this.resolutionX / 2 + d / (z - this.cameraZ) * (x - this.cameraX)),
+                    screenY : Math.round(this.resolutionY / 2 - d / (z - this.cameraZ) * (y - this.cameraY))
                 }
             },
 
