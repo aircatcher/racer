@@ -82,20 +82,32 @@
             },
 
             create : function() {
-                // this.engine.add.sprite(0, 0, "background-sky");
-                // this.engine.add.sprite(0, 0, "background-hills");
-                // this.engine.add.sprite(0, 0, "background-trees");
+                this.engine.add.sprite(0, 0, "background-sky");
+                this.engine.add.sprite(0, 0, "background-hills");
+                this.engine.add.sprite(0, 0, "background-trees");
 
                 this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
-                this.roadBitmap.diry = true;
                 this.engine.add.image(0, 0, this.roadBitmap);
+
+                // 显示fps
+                this.engine.time.advancedTiming = true;
+                this.fpsText = this.engine.add.text(
+                    20, 20, '', { font: '16px Arial', fill: '#ffffff' }
+                );
             },
 
             update : function() {
+                // 更新fps
+                if (this.engine.time.fps !== 0) {
+                    this.fpsText.setText(this.engine.time.fps + ' FPS');
+                }
+
                 var ctx = this.roadBitmap.ctx;
                 var i = this.road.findSegmentIndex(this.cameraZ);
+                ctx.clearRect(0, 0, this.resolutionX, this.resolutionY);
+                this.cameraZ += 50;
                 for(; i < this.road.segmentCount; i++) {
-                    var segment = this.road.segments[1],
+                    var segment = this.road.segments[i],
                         p1 = this.project(-this.road.width / 2, 0, segment.z),
                         p2 = this.project(this.road.width / 2, 0, segment.z),
                         p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap),
@@ -115,6 +127,8 @@
                         segment.color.road
                     );
                 }
+
+                this.roadBitmap.dirty = true;
             },
 
             // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
