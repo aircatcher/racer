@@ -49,8 +49,8 @@
         function Racer(opts) {
             //水平视角
             this.fieldOfView = 100 * Math.PI / 180;
-            //屏幕与眼球间的距离
-            this.distCameraToScreen = this.resolutionX / 2 / Math.tan(this.fieldOfView / 2);
+            //分辨率->坐标的比率
+            this.depth = 1 / Math.tan(this.fieldOfView / 2);
 
             this.road = new Road();
             this.player = new Player();
@@ -102,10 +102,10 @@
                     this.fpsText.setText(this.engine.time.fps + ' FPS');
                 }
 
+                var maxy = this.resolutionY;
                 var ctx = this.roadBitmap.ctx;
                 var i = this.road.findSegmentIndex(this.cameraZ);
                 ctx.clearRect(0, 0, this.resolutionX, this.resolutionY);
-                this.cameraZ += 50;
                 for(; i < this.road.segmentCount; i++) {
                     var segment = this.road.segments[i],
                         p1 = this.project(-this.road.width / 2, 0, segment.z),
@@ -113,7 +113,7 @@
                         p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap),
                         p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap);
 
-                    if(segment.z <= this.cameraZ || p3.screenY > this.resolutionY) continue;
+                    if(segment.z <= this.cameraZ || p3.screenY >= maxy) continue;
 
                     ctx.fillStyle = segment.color.grass;
                     ctx.fillRect(0, p4.screenY, this.resolutionX, p1.screenY - p4.screenY);
@@ -126,7 +126,11 @@
                         p4.screenX, p4.screenY,
                         segment.color.road
                     );
+
+                    maxy = p3.screenY;
                 }
+
+                this.cameraZ += 50;
 
                 this.roadBitmap.dirty = true;
             },
@@ -134,10 +138,10 @@
             // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
             // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
             project : function(x, y, z) {
-                var d = this.distCameraToScreen;
+                var scale = this.depth / (z - this.cameraZ);
                 return {
-                    screenX : Math.round(this.resolutionX / 2 + d / (z - this.cameraZ) * (x - this.cameraX)),
-                    screenY : Math.round(this.resolutionY / 2 - d / (z - this.cameraZ) * (y - this.cameraY))
+                    screenX : Math.round(this.resolutionX / 2 + this.resolutionX / 2 * scale * (x - this.cameraX)),
+                    screenY : Math.round(this.resolutionY / 2 - this.resolutionY / 2 * scale * (y - this.cameraY))
                 }
             },
 
