@@ -8,10 +8,27 @@
 </head>
 <body>
     <script type="text/javascript">
-        var Player = function() {
+        var maxSpeed = 1000,
+            accel = maxSpeed / 5;
+
+        var Camera = function() {
             this.x = 0;
             this.y = 0;
             this.z = 0;
+            this.resolutionX = 1024;
+            this.resolutionY = 768;
+            this.fieldOfView = 100 * Math.PI / 180;
+            this.depth = 1 / Math/tan(this.fieldOfView / 2);
+        };
+
+        Camera.prototype = {
+            project : function(x, y, z) {
+                var scale = this.depth / (z - this.cameraZ);
+                return {
+                    screenX : Math.round(this.resolutionX / 2 + this.resolutionX / 2 * scale * (x - this.cameraX)),
+                    screenY : Math.round(this.resolutionY / 2 - this.resolutionY / 2 * scale * (y - this.cameraY))
+                }
+            }
         };
 
         var Road = function() {
@@ -22,7 +39,9 @@
             // 道路分段数量
             this.segmentCount = 500;
             // 道路分段间距
-            this.segmentGap = 600;
+            this.segmentGap = 200;
+            // 每3条分段使用相同配色
+            this.stripLength = 3;
             // 车道数量
             this.lanes = 3;
             // 道路颜色
@@ -35,7 +54,7 @@
             for(var i = 0; i < this.segmentCount; i++) {
                 this.segments.push({
                     z : this.segmentGap * i,
-                    color : i % 2 ? this.colors.dark : this.colors.light
+                    color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
                 });
             }
         };
@@ -53,7 +72,7 @@
             this.depth = 1 / Math.tan(this.fieldOfView / 2);
 
             this.road = new Road();
-            this.player = new Player();
+            // this.player = new Player();
 
             this.engine = new Phaser.Game(this.resolutionX, this.resolutionY, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
@@ -82,9 +101,8 @@
             },
 
             create : function() {
-                this.engine.add.sprite(0, 0, "background-sky");
-                this.engine.add.sprite(0, 0, "background-hills");
-                this.engine.add.sprite(0, 0, "background-trees");
+                this.backgroundBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
+                this.engine.add.image(0, 0, this.backgroundBitmap);
 
                 this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
                 this.engine.add.image(0, 0, this.roadBitmap);
@@ -101,6 +119,24 @@
                 if (this.engine.time.fps !== 0) {
                     this.fpsText.setText(this.engine.time.fps + ' FPS');
                 }
+
+                this.backgroundBitmap.ctx.drawImage(
+                    this.engine.cache.getImage("background-sky"),
+                    0, 0, 640, 480,
+                    0, 0, this.resolutionX, this.resolutionY
+                );
+
+                this.backgroundBitmap.ctx.drawImage(
+                    this.engine.cache.getImage("background-hills"),
+                    0, 0, 640, 480,
+                    0, 0, this.resolutionX, this.resolutionY
+                );
+
+                this.backgroundBitmap.ctx.drawImage(
+                    this.engine.cache.getImage("background-trees"),
+                    0, 0, 640, 480,
+                    0, 0, this.resolutionX, this.resolutionY
+                );
 
                 var maxy = this.resolutionY;
                 var ctx = this.roadBitmap.ctx;
@@ -135,8 +171,6 @@
                 this.roadBitmap.dirty = true;
             },
 
-            // d / (z - this.cameraZ) = screenY / (y - this.cameraY);
-            // d / (z - this.cameraZ) = screenX / (x - this.cameraX);
             project : function(x, y, z) {
                 var scale = this.depth / (z - this.cameraZ);
                 return {
@@ -154,6 +188,11 @@
                 ctx.lineTo(x4, y4);
                 ctx.closePath();
                 ctx.fill();
+            },
+
+            increase : function(start, increment, max) {
+                var result = start + increment;
+                return result > max ? max : result;
             }
         };
 
