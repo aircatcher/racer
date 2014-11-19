@@ -129,7 +129,7 @@
                 }
 
                 this.cameraZ += speed;
-                // if(this.cameraZ > this.road.trackDistance) this.cameraZ = this.road.trackDistance;
+                if(this.cameraZ > this.road.trackDistance) this.cameraZ -= this.road.trackDistance;
 
                 if(this.engine.input.keyboard.isDown(Phaser.Keyboard.UP)) {
                     speed += accel;
@@ -142,9 +142,9 @@
                 if(speed < 0) speed = 0;
 
                 if(this.engine.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
-                    this.cameraX += speed / maxSpeed
+                    this.cameraX += speed / maxSpeed * 5
                 } else if(this.engine.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
-                    this.cameraX += -speed / maxSpeed
+                    this.cameraX += -speed / maxSpeed * 5
                 }
                 if(this.cameraX > 2000) this.cameraX = 2000;
                 if(this.cameraX < -2000) this.cameraX = -2000;
@@ -175,9 +175,9 @@
                     var cur = (index + n) % this.road.segmentCount,
                         segment = this.road.segments[cur];
 
-                    if(segment.z <= this.cameraZ) continue;
+                    // if(segment.z <= this.cameraZ) continue;
 
-                    p1 = this.project(-this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
+                    var p1 = this.project(-this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
                     p2 = this.project(this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ ),
                     p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
                     p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ);
