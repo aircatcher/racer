@@ -8,8 +8,11 @@
 </head>
 <body>
     <script type="text/javascript">
-        var maxSpeed = 1000,
-            accel = maxSpeed / 5;
+        var speed = 0,
+            maxSpeed = 150,   //maxSpeed = segmentLength/step,
+            accel =  maxSpeed/5,
+            breaking = -maxSpeed,
+            decel = -maxSpeed/5;
 
         var Camera = function() {
             this.x = 0;
@@ -40,6 +43,8 @@
             this.segmentCount = 500;
             // 道路分段间距
             this.segmentGap = 200;
+            // 总长度
+            this.trackDistance = this.segmentCount * this.segmentGap;
             // 每3条分段使用相同配色
             this.stripLength = 3;
             // 车道数量
@@ -62,6 +67,10 @@
         Road.prototype = {
             findSegmentIndex : function(z) {
                 return Math.floor(z / this.segmentGap) % this.segmentCount;
+            },
+
+            findSegment : function(z) {
+                return this.segments[this.findSegmentIndex(z)];
             }
         }
 
@@ -72,7 +81,6 @@
             this.depth = 1 / Math.tan(this.fieldOfView / 2);
 
             this.road = new Road();
-            // this.player = new Player();
 
             this.engine = new Phaser.Game(this.resolutionX, this.resolutionY, Phaser.AUTO, "racer");
             this.engine.state.add("racer", this, true);
@@ -87,7 +95,7 @@
 
             cameraX : 0,
 
-            cameraY : 1000,
+            cameraY : 500,
 
             cameraZ : 0,
 
@@ -120,6 +128,27 @@
                     this.fpsText.setText(this.engine.time.fps + ' FPS');
                 }
 
+                this.cameraZ += speed;
+                // if(this.cameraZ > this.road.trackDistance) this.cameraZ = this.road.trackDistance;
+
+                if(this.engine.input.keyboard.isDown(Phaser.Keyboard.UP)) {
+                    speed += accel;
+                } else if(this.engine.input.keyboard.isDown(Phaser.Keyboard.DOWN)) {
+                    speed += breaking;
+                } else {
+                    speed += decel;
+                }
+                if(speed > maxSpeed) speed = maxSpeed;
+                if(speed < 0) speed = 0;
+
+                if(this.engine.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+                    this.cameraX += speed / maxSpeed
+                } else if(this.engine.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+                    this.cameraX += -speed / maxSpeed
+                }
+                if(this.cameraX > 2000) this.cameraX = 2000;
+                if(this.cameraX < -2000) this.cameraX = -2000;
+
                 this.backgroundBitmap.ctx.drawImage(
                     this.engine.cache.getImage("background-sky"),
                     0, 0, 640, 480,
@@ -140,16 +169,20 @@
 
                 var maxy = this.resolutionY;
                 var ctx = this.roadBitmap.ctx;
-                var i = this.road.findSegmentIndex(this.cameraZ);
+                var index = this.road.findSegmentIndex(this.cameraZ);
                 ctx.clearRect(0, 0, this.resolutionX, this.resolutionY);
-                for(; i < this.road.segmentCount; i++) {
-                    var segment = this.road.segments[i],
-                        p1 = this.project(-this.road.width / 2, 0, segment.z),
-                        p2 = this.project(this.road.width / 2, 0, segment.z),
-                        p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap),
-                        p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap);
+                for(var n = 0; n < 500; n++) {
+                    var cur = (index + n) % this.road.segmentCount,
+                        segment = this.road.segments[cur];
 
-                    if(segment.z <= this.cameraZ || p3.screenY >= maxy) continue;
+                    if(segment.z <= this.cameraZ) continue;
+
+                    p1 = this.project(-this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
+                    p2 = this.project(this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ ),
+                    p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
+                    p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ);
+
+                    if(p3.screenY >= maxy) continue;
 
                     ctx.fillStyle = segment.color.grass;
                     ctx.fillRect(0, p4.screenY, this.resolutionX, p1.screenY - p4.screenY);
@@ -166,16 +199,14 @@
                     maxy = p3.screenY;
                 }
 
-                this.cameraZ += 50;
-
                 this.roadBitmap.dirty = true;
             },
 
-            project : function(x, y, z) {
-                var scale = this.depth / (z - this.cameraZ);
+            project : function(x, y, z, cameraX, cameraY, cameraZ) {
+                var scale = this.depth / (z - cameraZ);
                 return {
-                    screenX : Math.round(this.resolutionX / 2 + this.resolutionX / 2 * scale * (x - this.cameraX)),
-                    screenY : Math.round(this.resolutionY / 2 - this.resolutionY / 2 * scale * (y - this.cameraY))
+                    screenX : Math.round(this.resolutionX / 2 + this.resolutionX / 2 * scale * (x - cameraX)),
+                    screenY : Math.round(this.resolutionY / 2 - this.resolutionY / 2 * scale * (y - cameraY))
                 }
             },
 
