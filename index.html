@@ -71,6 +71,14 @@
 
             findSegment : function(z) {
                 return this.segments[this.findSegmentIndex(z)];
+            },
+
+            rumbleWidth : function(projectedRoadWidth) {
+                return projectedRoadWidth / Math.max(6,  2 * this.lanes); 
+            },
+
+            laneMarkerWidth: function(projectedRoadWidth) {
+                return projectedRoadWidth / Math.max(32, 8 * this.lanes);
             }
         }
 
@@ -178,9 +186,9 @@
                     // if(segment.z <= this.cameraZ) continue;
 
                     var p1 = this.project(-this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
-                    p2 = this.project(this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ ),
-                    p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
-                    p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ);
+                        p2 = this.project(this.road.width / 2, 0, segment.z, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ ),
+                        p3 = this.project(this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ),
+                        p4 = this.project(-this.road.width / 2, 0, segment.z + this.road.segmentGap, this.cameraX, this.cameraY, cur < index ? this.cameraZ - this.road.trackDistance : this.cameraZ);
 
                     if(p3.screenY >= maxy) continue;
 
@@ -194,6 +202,31 @@
                         p3.screenX, p3.screenY,
                         p4.screenX, p4.screenY,
                         segment.color.road
+                    );
+
+                    var w1 = p2.screenX - p1.screenX,
+                        w2 = p3.screenX - p4.screenX,
+                        rw1 = this.road.rumbleWidth(w1),
+                        rw2 = this.road.rumbleWidth(w2),
+                        lw1 = this.road.laneMarkerWidth(w1),
+                        lw2 = this.road.laneMarkerWidth(w2);
+
+                    this.polygon(
+                        ctx,
+                        p1.screenX - rw1, p1.screenY,
+                        p1.screenX, p1.screenY,
+                        p4.screenX, p4.screenY,
+                        p4.screenX - rw2, p4.screenY,
+                        segment.color.rumble
+                    );
+
+                    this.polygon(
+                        ctx,
+                        p2.screenX + rw1, p2.screenY,
+                        p2.screenX, p2.screenY,
+                        p3.screenX, p3.screenY,
+                        p3.screenX + rw2, p3.screenY,
+                        segment.color.rumble
                     );
 
                     maxy = p3.screenY;
@@ -219,11 +252,6 @@
                 ctx.lineTo(x4, y4);
                 ctx.closePath();
                 ctx.fill();
-            },
-
-            increase : function(start, increment, max) {
-                var result = start + increment;
-                return result > max ? max : result;
             }
         };
 
