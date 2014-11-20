@@ -123,6 +123,8 @@
                 this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
                 this.engine.add.image(0, 0, this.roadBitmap);
 
+                this.engine.add.image(this.resolutionX / 2 - 20, this.resolutionY - 50, "player-straight");
+
                 // 显示fps
                 this.engine.time.advancedTiming = true;
                 this.fpsText = this.engine.add.text(
@@ -229,6 +231,19 @@
                         segment.color.rumble
                     );
 
+                    if(segment.color.lane) {
+                        for(var i = 1; i < this.road.lanes; i++) {
+                            this.polygon(
+                                ctx,
+                                p1.screenX + w1 / this.road.lanes * i - lw1 / 2, p1.screenY,
+                                p1.screenX + w1 / this.road.lanes * i + lw1 / 2, p1.screenY,
+                                p4.screenX + w2 / this.road.lanes * i + lw2 / 2, p4.screenY,
+                                p4.screenX + w2 / this.road.lanes * i - lw2 / 2, p4.screenY,
+                                segment.color.lane
+                            );
+                        }
+                    }
+                    
                     maxy = p3.screenY;
                 }
 
