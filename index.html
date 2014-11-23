@@ -123,7 +123,16 @@
                 this.roadBitmap = this.engine.add.bitmapData(this.resolutionX, this.resolutionY);
                 this.engine.add.image(0, 0, this.roadBitmap);
 
-                this.engine.add.image(this.resolutionX / 2 - 20, this.resolutionY - 50, "player-straight");
+                // this.engine.add.image(this.resolutionX / 2 - 20, this.resolutionY - 50, "player-straight");
+
+                var playerWidth = this.road.width * 0.3 * (this.depth / this.cameraY / this.depth) * this.resolutionX / 2 * 640 / 1024;
+                var playerHeight = 41 / 80 * playerWidth;
+                this.carBitmap = this.engine.add.bitmapData(playerWidth, playerHeight);
+                this.engine.add.image(
+                    (this.resolutionX - playerWidth) / 2,
+                    this.resolutionY - playerHeight,
+                    this.carBitmap
+                );
 
                 // 显示fps
                 this.engine.time.advancedTiming = true;
@@ -152,9 +161,9 @@
                 if(speed < 0) speed = 0;
 
                 if(this.engine.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
-                    this.cameraX += speed / maxSpeed * 5
+                    this.cameraX += speed / maxSpeed * 20
                 } else if(this.engine.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
-                    this.cameraX += -speed / maxSpeed * 5
+                    this.cameraX += -speed / maxSpeed * 20
                 }
                 if(this.cameraX > 2000) this.cameraX = 2000;
                 if(this.cameraX < -2000) this.cameraX = -2000;
@@ -175,6 +184,12 @@
                     this.engine.cache.getImage("background-trees"),
                     0, 0, 640, 480,
                     0, 0, this.resolutionX, this.resolutionY
+                );
+
+                this.carBitmap.ctx.drawImage(
+                    this.engine.cache.getImage("player-straight"),
+                    0, 0, 80, 41,
+                    0, 0, this.carBitmap.width, this.carBitmap.height
                 );
 
                 var maxy = this.resolutionY;
@@ -243,7 +258,7 @@
                             );
                         }
                     }
-                    
+
                     maxy = p3.screenY;
                 }
 
