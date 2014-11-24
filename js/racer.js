@@ -2,7 +2,7 @@ var Racer = function(opts) {
     //分辨率 or canvas宽高
     this.resolution = {x : 640, y : 480};
     //游戏镜头坐标
-    this.camera = {x : 0, y : 1000, z : 0};
+    this.pseudo3DCamera = {x : 0, y : 1000, z : 0};
     //水平视角
     this.fieldOfView = 100 * Math.PI / 180;
     //镜头与屏幕的间距
@@ -55,15 +55,15 @@ Racer.prototype = {
             this.fpsText.setText(this.engine.time.fps + ' FPS');
         }
 
-        this.car.run();
-        this.camera.z = this.car.z - this.cameraDepth;
+        this.car.run(this.time.physicsElapsed);
+        this.pseudo3DCamera.z = this.car.z - this.cameraDepth;
 
         if(this.key.up.isDown) {
-            this.car.accelerate();
+            this.car.accelerate(this.time.physicsElapsed);
         } else if(this.key.down.isDown) {
-            this.car.brake();
+            this.car.brake(this.time.physicsElapsed);
         } else {
-            this.car.decelerate();
+            this.car.decelerate(this.time.physicsElapsed);
         }
 
         if(this.key.right.isDown) {
@@ -76,7 +76,5 @@ Racer.prototype = {
     render : function() {
         this.road.render();
         this.car.render();
-    },
-
-    project : function() {}
+    }
 };

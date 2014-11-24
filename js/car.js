@@ -2,9 +2,12 @@ var Car = function(game) {
     this.game = game;
     this.x = 0;
     this.y = 0;
-    this.z = this.game.camera.y / Math.tan(this.game.fieldOfView / 2);
-
-    
+    this.z = this.game.pseudo3DCamera.y / Math.tan(this.game.fieldOfView / 2);
+    this.speed = 0;
+    this.maxSpeed = 1000;
+    this.accel = this.maxSpeed / 5;
+    this.breaking = -this.maxSpeed;
+    this.decel = -this.maxSpeed / 5;
 };
 
 Car.prototype = {
@@ -22,18 +25,34 @@ Car.prototype = {
         this.game.engine.add.image(0, 0, this.bitmap);
     },
 
-    accelerate : function() {},
+    accelerate : function(t) {
+        this.speed += this.accel * t;
+        if(this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+        return this.speed;
+    },
 
-    brake : function() {},
+    brake : function(t) {
+        this.speed += this.breaking * t;
+        if(this.speed < 0) this.speed = 0;
+        return this.speed;
+    },
 
-    decelerate : function() {},
+    decelerate : function(t) {
+        this.speed += this.decel * t;
+        if(this.speed < 0) this.speed = 0;
+        return this.speed;
+    },
 
     turnRight : function() {},
 
     turnLeft : function() {},
 
-    run : function() {
-
+    run : function(t) {
+        this.z += this.speed * t;
+        if(this.z >= this.game.road.trackDistance) {
+            this.z -= this.game.road.trackDistance;
+        }
+        return this.z;
     },
 
     render : function() {}

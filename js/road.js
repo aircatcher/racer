@@ -41,38 +41,76 @@ Road.prototype = {
     },
 
     render : function() {
-        var base = this.findSegmentIndex(this.game.camera.z);
-        for(var i = 0; i < this.segmentCount; i++) {
+        var base = this.findSegmentIndex(this.game.pseudo3DCamera.z),
+            maxy = this.game.resolution.y;
+
+        for(var i = 0; i < this.segmentCount - 1; i++) {
             var p1 = this.segments[(base + i) % this.segmentCount],
                 p2 = this.segments[(base + i + 1) % this.segmentCount];
 
             this.project(p1);
             this.project(p2);
 
+            // if(p1.screen.y >= maxy) continue;
+
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
 
+            //草地
+            this.polygon(this.bitmap.ctx,
+                0, p2.screen.y,
+                this.game.resolution.x, p2.screen.y,
+                this.game.resolution.x, p1.screen.y,
+                0, p1.screen.y,
+                p1.color.grass
+            );
+
+            //公路左边界
             this.polygon(this.bitmap.ctx,
                 p1.screen.x - p1.screen.w / 2 - rw1, p1.screen.y,
                 p1.screen.x - p1.screen.w / 2, p1.screen.y,
                 p2.screen.x - p2.screen.w / 2, p2.screen.y,
-                p2.screen.x - p2.screen.w / 2 - rw2, p2.screen.y
+                p2.screen.x - p2.screen.w / 2 - rw2, p2.screen.y,
+                p1.color.rumble
             );
 
+            //公路右边界
             this.polygon(this.bitmap.ctx,
                 p1.screen.x + p1.screen.w / 2 + rw1, p1.screen.y,
                 p1.screen.x + p1.screen.w / 2, p1.screen.y,
                 p2.screen.x + p2.screen.w / 2, p2.screen.y,
-                p2.screen.x + p2.screen.w / 2 + rw2, p2.screen.y
+                p2.screen.x + p2.screen.w / 2 + rw2, p2.screen.y,
+                p1.color.rumble
             );
 
+            //公路
             this.polygon(this.bitmap.ctx,
                 p1.screen.x - p1.screen.w / 2, p1.screen.y,
                 p1.screen.x + p1.screen.w / 2, p1.screen.y,
                 p2.screen.x + p2.screen.w / 2, p2.screen.y,
-                p2.screen.x - p2.screen.w / 2, p2.screen.y
+                p2.screen.x - p2.screen.w / 2, p2.screen.y,
+                p1.color.road
             );
+
+            if(p1.color.lane) {
+                var lw1 = this.laneMarkerWidth(p1.screen.w),
+                    lw2 = this.laneMarkerWidth(p2.screen.w);
+                for(var j = 1; j < this.lanes; j++) {
+                    this.polygon(
+                        this.bitmap.ctx,
+                        p1.screen.x - p1.screen.w / 2 + p1.screen.w / this.lanes * j - lw1 / 2, p1.screen.y,
+                        p1.screen.x - p1.screen.w / 2 + p1.screen.w / this.lanes * j + lw1 / 2, p1.screen.y,
+                        p2.screen.x - p2.screen.w / 2 + p2.screen.w / this.lanes * j + lw2 / 2, p2.screen.y,
+                        p2.screen.x - p2.screen.w / 2 + p2.screen.w / this.lanes * j - lw2 / 2, p2.screen.y,
+                        p1.color.lane
+                    );
+                }
+            }
+
+            maxy = p1.screen.y;
         }
+
+        this.bitmap.dirty = true;
     },
 
     findSegmentIndex : function(z) {
@@ -103,21 +141,18 @@ Road.prototype = {
     },
 
     project : function(p) {
-        if(!p.camera) {
-            p.camera = {
-                x : p.x || 0 - this.game.camera.x,
-                y : p.y || 0 - this.game.camera.y,
-                z : p.z || 0 - this.game.camera.z
-            };
-        }
+        var camera = this.game.pseudo3DCamera;
+        p.camera = {
+            x : p.world.x || 0 - camera.x,
+            y : p.world.y || 0 - camera.y,
+            z : p.world.z || 0 - (camera.z - p.world.z < camera.z ? this.trackDistance : 0)
+        };
 
-        if(!p.screen) {
-            var rate = this.game.cameraDepth / p.camera.z;
-            p.screen = {
-                x : Math.round(this.game.resolution.x / 2 + rate * p.camera.x),
-                y : Math.round(this.game.resolution.y / 2 - rate * p.camera.y),
-                w : Math.round(rate * this.width)
-            };
-        }
+        var rate = this.game.cameraDepth / p.camera.z;
+        p.screen = {
+            x : Math.round(this.game.resolution.x / 2 + rate * p.camera.x),
+            y : Math.round(this.game.resolution.y / 2 - rate * p.camera.y),
+            w : Math.round(rate * this.width)
+        };
     }
 };
