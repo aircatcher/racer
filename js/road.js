@@ -41,6 +41,8 @@ Road.prototype = {
     },
 
     render : function() {
+        this.bitmap.ctx.clearRect(0, 0, this.game.resolution.x, this.game.resolution.y);
+
         var base = this.findSegmentIndex(this.game.pseudo3DCamera.z),
             maxy = this.game.resolution.y;
 
@@ -51,7 +53,7 @@ Road.prototype = {
             this.project(p1);
             this.project(p2);
 
-            // if(p1.screen.y >= maxy) continue;
+            if(p2.screen.y > maxy) continue;
 
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
@@ -107,7 +109,7 @@ Road.prototype = {
                 }
             }
 
-            maxy = p1.screen.y;
+            maxy = p2.screen.y;
         }
 
         this.bitmap.dirty = true;
@@ -145,7 +147,7 @@ Road.prototype = {
         p.camera = {
             x : p.world.x || 0 - camera.x,
             y : p.world.y || 0 - camera.y,
-            z : p.world.z || 0 - (camera.z - p.world.z < camera.z ? this.trackDistance : 0)
+            z : p.world.z || 0 - (camera.z - (p.world.z < camera.z ? this.trackDistance : 0))
         };
 
         var rate = this.game.cameraDepth / p.camera.z;
