@@ -58,7 +58,8 @@ Racer.prototype = {
         this.car.run(this.time.physicsElapsed);
         this.pseudo3DCamera.z = this.car.z - this.cameraDepth;
 
-        if(this.key.up.isDown) {
+        // if(this.key.up.isDown) {
+        if(true) {
             this.car.accelerate(this.time.physicsElapsed);
         } else if(this.key.down.isDown) {
             this.car.brake(this.time.physicsElapsed);
