@@ -1,8 +1,9 @@
 var Car = function(game) {
     this.game = game;
+    this.distanceToCamera = this.game.pseudo3DCamera.y / Math.tan(this.game.fieldOfView / 2);
     this.x = 0;
     this.y = 0;
-    this.z = this.game.pseudo3DCamera.y / Math.tan(this.game.fieldOfView / 2);
+    this.z = this.distanceToCamera;
     this.speed = 0;
     this.maxSpeed = 1000;
     this.accel = this.maxSpeed / 5;
@@ -52,6 +53,7 @@ Car.prototype = {
         if(this.z >= this.game.road.trackDistance) {
             this.z -= this.game.road.trackDistance;
         }
+        this.game.pseudo3DCamera.z = this.z - this.distanceToCamera;
         return this.z;
     },
 

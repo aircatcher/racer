@@ -23,9 +23,8 @@ var Road = function(game) {
     // 初始化道路分段
     for(var i = 0; i < this.segmentCount; i++) {
         this.segments.push({
-            world : {z : this.segmentGap * i},
-            camera : null,
-            screen : null,
+            p1 : {world : {z : this.segmentGap * i}, camera : null, screen : null},
+            p2 : {world : {z : this.segmentGap * (i + 1)}, camera : null, screen : null},
             color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
         });
     }
@@ -46,14 +45,17 @@ Road.prototype = {
         var base = this.findSegmentIndex(this.game.pseudo3DCamera.z),
             maxy = this.game.resolution.y;
 
-        for(var i = 0; i < this.segmentCount - 1; i++) {
-            var p1 = this.segments[(base + i) % this.segmentCount],
-                p2 = this.segments[(base + i + 1) % this.segmentCount];
+        for(var i = 0; i < this.segmentCount; i++) {
+            var cur = (base + i) % this.segmentCount,
+                segment = this.segments[cur],
+                p1 = segment.p1,
+                p2 = segment.p2,
+                looped = cur < base;
 
-            this.project(p1);
-            this.project(p2);
+            this.project(p1, looped);
+            this.project(p2, looped);
 
-            if(p2.screen.y > maxy) continue;
+            if(p2.screen.y >= maxy) continue;
 
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
@@ -64,7 +66,7 @@ Road.prototype = {
                 this.game.resolution.x, p2.screen.y,
                 this.game.resolution.x, p1.screen.y,
                 0, p1.screen.y,
-                p1.color.grass
+                segment.color.grass
             );
 
             //公路左边界
@@ -73,7 +75,7 @@ Road.prototype = {
                 p1.screen.x - p1.screen.w / 2, p1.screen.y,
                 p2.screen.x - p2.screen.w / 2, p2.screen.y,
                 p2.screen.x - p2.screen.w / 2 - rw2, p2.screen.y,
-                p1.color.rumble
+                segment.color.rumble
             );
 
             //公路右边界
@@ -82,7 +84,7 @@ Road.prototype = {
                 p1.screen.x + p1.screen.w / 2, p1.screen.y,
                 p2.screen.x + p2.screen.w / 2, p2.screen.y,
                 p2.screen.x + p2.screen.w / 2 + rw2, p2.screen.y,
-                p1.color.rumble
+                segment.color.rumble
             );
 
             //公路
@@ -91,10 +93,10 @@ Road.prototype = {
                 p1.screen.x + p1.screen.w / 2, p1.screen.y,
                 p2.screen.x + p2.screen.w / 2, p2.screen.y,
                 p2.screen.x - p2.screen.w / 2, p2.screen.y,
-                p1.color.road
+                segment.color.road
             );
 
-            if(p1.color.lane) {
+            if(segment.color.lane) {
                 var lw1 = this.laneMarkerWidth(p1.screen.w),
                     lw2 = this.laneMarkerWidth(p2.screen.w);
                 for(var j = 1; j < this.lanes; j++) {
@@ -104,7 +106,7 @@ Road.prototype = {
                         p1.screen.x - p1.screen.w / 2 + p1.screen.w / this.lanes * j + lw1 / 2, p1.screen.y,
                         p2.screen.x - p2.screen.w / 2 + p2.screen.w / this.lanes * j + lw2 / 2, p2.screen.y,
                         p2.screen.x - p2.screen.w / 2 + p2.screen.w / this.lanes * j - lw2 / 2, p2.screen.y,
-                        p1.color.lane
+                        segment.color.lane
                     );
                 }
             }
@@ -142,12 +144,12 @@ Road.prototype = {
         ctx.fill();
     },
 
-    project : function(p) {
+    project : function(p, looped) {
         var camera = this.game.pseudo3DCamera;
         p.camera = {
             x : p.world.x || 0 - camera.x,
             y : p.world.y || 0 - camera.y,
-            z : p.world.z || 0 - (camera.z - (p.world.z < camera.z ? this.trackDistance : 0))
+            z : p.world.z || 0 - (camera.z - looped ? this.trackDistance : 0)
         };
 
         var rate = this.game.cameraDepth / p.camera.z;
