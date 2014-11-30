@@ -147,9 +147,9 @@ Road.prototype = {
     project : function(p, looped) {
         var camera = this.game.pseudo3DCamera;
         p.camera = {
-            x : p.world.x || 0 - camera.x,
-            y : p.world.y || 0 - camera.y,
-            z : p.world.z || 0 - (camera.z - looped ? this.trackDistance : 0)
+            x : (p.world.x || 0) - camera.x,
+            y : (p.world.y || 0) - camera.y,
+            z : (p.world.z || 0) - (camera.z - (looped ? this.trackDistance : 0))
         };
 
         var rate = this.game.cameraDepth / p.camera.z;
