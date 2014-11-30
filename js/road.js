@@ -42,7 +42,7 @@ Road.prototype = {
     render : function() {
         this.bitmap.ctx.clearRect(0, 0, this.game.resolution.x, this.game.resolution.y);
 
-        var base = this.findSegmentIndex(this.game.pseudo3DCamera.z),
+        var base = this.findSegmentIndex(this.game.pseudo3DCamera.z + this.game.car.mileage),
             maxy = this.game.resolution.y;
 
         for(var i = 0; i < this.segmentCount; i++) {
@@ -149,7 +149,7 @@ Road.prototype = {
         p.camera = {
             x : (p.world.x || 0) - camera.x,
             y : (p.world.y || 0) - camera.y,
-            z : (p.world.z || 0) - (camera.z - (looped ? this.trackDistance : 0))
+            z : (p.world.z || 0) - (camera.z + this.game.car.mileage - (looped ? this.trackDistance : 0))
         };
 
         var rate = this.game.cameraDepth / p.camera.z;

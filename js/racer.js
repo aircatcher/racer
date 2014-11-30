@@ -56,7 +56,6 @@ Racer.prototype = {
         }
 
         this.car.run(this.time.physicsElapsed);
-        // this.pseudo3DCamera.z = this.car.z - this.cameraDepth;
 
         // if(this.key.up.isDown) {
         if(true) {
