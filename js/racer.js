@@ -57,8 +57,7 @@ Racer.prototype = {
 
         this.car.run(this.time.physicsElapsed);
 
-        // if(this.key.up.isDown) {
-        if(true) {
+        if(this.key.up.isDown) {
             this.car.accelerate(this.time.physicsElapsed);
         } else if(this.key.down.isDown) {
             this.car.brake(this.time.physicsElapsed);
@@ -67,9 +66,9 @@ Racer.prototype = {
         }
 
         if(this.key.right.isDown) {
-            this.car.turnRight();
+            this.car.turnRight(this.time.physicsElapsed);
         } else if(this.key.left.isDown) {
-            this.car.turnLeft();
+            this.car.turnLeft(this.time.physicsElapsed);
         }
     },
 
