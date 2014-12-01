@@ -158,5 +158,7 @@ Road.prototype = {
             y : Math.round(this.game.resolution.y / 2 - rate * p.camera.y),
             w : Math.round(rate * this.width)
         };
-    }
+    },
+
+    setRoad : function() {}
 };
