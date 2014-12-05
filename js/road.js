@@ -29,14 +29,6 @@ var Road = function(game) {
         });
     }
 
-    var h = 0;
-    for(i = this.segmentCount - 200; i < this.segmentCount; i++) {
-        this.segments.push({
-            p1 : {world : {z : this.segmentGap * i, y : h}, camera : null, screen : null},
-            p2 : {world : {z : this.segmentGap * (i + 1), y : (h += 10)}, camera : null, screen : null},
-            color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
-        });
-    }
 };
 
 Road.prototype = {
