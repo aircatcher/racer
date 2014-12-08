@@ -161,5 +161,7 @@ Road.prototype = {
         };
     },
 
-    setRoad : function() {}
+    setRoad : function() {},
+
+    initRaod : function() {}
 };
