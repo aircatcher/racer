@@ -5,11 +5,11 @@ var Road = function(game) {
     // 道路分段
     this.segments = [];
     // 道路分段数量
-    this.segmentCount = 500;
+    // this.segments.length = 500;
     // 道路分段间距
     this.segmentGap = 200;
     // 总长度
-    this.trackDistance = this.segmentCount * this.segmentGap;
+    this.trackDistance = this.segments.length * this.segmentGap;
     // 每3条分段使用相同配色
     this.stripLength = 3;
     // 车道数量
@@ -38,8 +38,8 @@ Road.prototype = {
         var base = this.findSegmentIndex(this.game.pseudo3DCamera.z + this.game.car.mileage),
             maxy = this.game.resolution.y;
 
-        for(var i = 0; i < this.segmentCount; i++) {
-            var cur = (base + i) % this.segmentCount,
+        for(var i = 0; i < this.segments.length; i++) {
+            var cur = (base + i) % this.segments.length,
                 segment = this.segments[cur],
                 p1 = segment.p1,
                 p2 = segment.p2,
@@ -111,7 +111,7 @@ Road.prototype = {
     },
 
     findSegmentIndex : function(z) {
-        return Math.floor(z / this.segmentGap) % this.segmentCount;
+        return Math.floor(z / this.segmentGap) % this.segments.length;
     },
 
     findSegment : function(z) {
@@ -155,12 +155,52 @@ Road.prototype = {
 
     setRoad : function() {
         // 初始化道路分段
-        for(var i = 0; i < this.segmentCount - 200; i++) {
-            this.segments.push({
-                p1 : {world : {z : this.segmentGap * i}, camera : null, screen : null},
-                p2 : {world : {z : this.segmentGap * (i + 1)}, camera : null, screen : null},
-                color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
-            });
+        var num = Road.LENGTH.SHORT;
+        var height = Road.HILL.LOW;
+        this.addRoad(num, num, num,  0,  height/2);
+        this.addRoad(num, num, num,  0, -height);
+        this.addRoad(num, num, num,  0,  height);
+        this.addRoad(num, num, num,  0,  0);
+        this.addRoad(num, num, num,  0,  height/2);
+        this.addRoad(num, num, num,  0,  0);
+    },
+
+    addSegment : function(y) {
+        var i = this.segments.length,
+            lastY = this._lastY();
+        this.segments.push({
+            p1 : {world : {y : lastY, z : this.segmentGap * i}, camera : null, screen : null},
+            p2 : {world : {y : y, z : this.segmentGap * (i + 1)}, camera : null, screen : null},
+            color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
+        });
+    },
+
+    addRoad : function(enter, hold, leave, y) {
+        var startY = this._lastY(),
+            endY = startY + y * this.segmentGap,
+            total = enter + hold + leave,
+            i;
+        for(i = 0; i < enter; i++) {
+            this.addSegment(Road.easeInOut(startY, endY, i / total));
         }
+        for(i = 0; i < hold; i++) {
+            this.addSegment(Road.easeInOut(startY, endY, (enter + i) / total));
+        }
+        for(i = 0; i < leave; i++) {
+            this.addSegment(Road.easeInOut(startY, endY, (enter + hold + i) / total));
+        }
+    },
+
+    _lastY : function() {
+        var i = this.segments.length;
+        return i === 0 ? 0 : this.segments[i - 1].p2.world.y;
     }
+};
+
+Road.LENGTH = {NONE : 0, SHORT : 25, MEDIUM : 50, LONG : 100};
+Road.HILL = {NONE : 0, LOW : 20, MEDIUM : 40, HIGH : 60};
+Road.CURVE = {NONE : 0, EASY : 2, MEDIUM : 4, HARD : 6};
+
+Road.easeInOut = function(a, b, percent) {
+    return a + (b - a) * ((-Math.cos(percent * Math.PI) / 2) + 0.5);
 };
