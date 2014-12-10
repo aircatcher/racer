@@ -175,7 +175,7 @@ Road.prototype = {
         });
     },
 
-    addRoad : function(enter, hold, leave, y) {
+    addRoad : function(enter, hold, leave, curve, y) {
         var startY = this._lastY(),
             endY = startY + y * this.segmentGap,
             total = enter + hold + leave,
