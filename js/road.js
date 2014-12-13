@@ -48,7 +48,9 @@ Road.prototype = {
             this.project(p1, looped);
             this.project(p2, looped);
 
-            if(p2.screen.y >= maxy) continue;
+            if(p2.screen.y >= maxy ||
+                    p1.camera.z <= this.game.cameraDepth)
+                continue;
 
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
