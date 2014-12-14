@@ -38,6 +38,8 @@ Road.prototype = {
         var base = this.findSegmentIndex(this.game.pseudo3DCamera.z + this.game.car.mileage),
             maxy = this.game.resolution.y;
 
+        var arr = [];
+
         for(var i = 0; i < this.segments.length; i++) {
             var cur = (base + i) % this.segments.length,
                 segment = this.segments[cur],
@@ -48,9 +50,9 @@ Road.prototype = {
             this.project(p1, looped);
             this.project(p2, looped);
 
-            if(p2.screen.y >= maxy ||
-                    p1.camera.z <= this.game.cameraDepth)
-                continue;
+            if(p2.screen.y >= maxy) continue;
+
+            arr.push(i);
 
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
@@ -110,6 +112,8 @@ Road.prototype = {
         }
 
         this.bitmap.dirty = true;
+
+        console.log(arr.join('-'));
     },
 
     findSegmentIndex : function(z) {
