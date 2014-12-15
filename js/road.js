@@ -9,7 +9,7 @@ var Road = function(game) {
     // 道路分段间距
     this.segmentGap = 200;
     // 总长度
-    this.trackDistance = this.segments.length * this.segmentGap;
+    // this.trackDistance = this.segments.length * this.segmentGap;
     // 每3条分段使用相同配色
     this.stripLength = 3;
     // 车道数量
@@ -112,8 +112,6 @@ Road.prototype = {
         }
 
         this.bitmap.dirty = true;
-
-        console.log(arr.join('-'));
     },
 
     findSegmentIndex : function(z) {
@@ -169,6 +167,8 @@ Road.prototype = {
         this.addRoad(num, num, num,  0,  0);
         this.addRoad(num, num, num,  0,  height/2);
         this.addRoad(num, num, num,  0,  0);
+        this.trackDistance = this.segments.length * this.segmentGap;
+        console.log(this.segments);
     },
 
     addSegment : function(y) {
