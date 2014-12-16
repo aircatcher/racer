@@ -145,7 +145,7 @@ Road.prototype = {
         var camera = this.game.pseudo3DCamera;
         p.camera = {
             x : (p.world.x || 0) - (camera.x + this.game.car.offsetX),
-            y : (p.world.y || 0) - camera.y,
+            y : (p.world.y || 0) - (camera.y + this.game.car.offsetY),
             z : (p.world.z || 0) - (camera.z + this.game.car.mileage - (looped ? this.trackDistance : 0))
         };
 
@@ -168,7 +168,6 @@ Road.prototype = {
         this.addRoad(num, num, num,  0,  height/2);
         this.addRoad(num, num, num,  0,  0);
         this.trackDistance = this.segments.length * this.segmentGap;
-        console.log(this.segments);
     },
 
     addSegment : function(y) {

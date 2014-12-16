@@ -1,6 +1,7 @@
 var Car = function(game) {
     this.game = game;
     this.offsetX = 0;
+    this.offsetY = 0;
     this.mileage = 0;
     this.speed = 0;
     this.maxSpeed = this.game.road.segmentGap * 60;
@@ -90,6 +91,12 @@ Car.prototype = {
         if(this.mileage >= this.game.road.trackDistance) {
             this.mileage -= this.game.road.trackDistance;
         }
+
+        var percent = ((this.mileage + this.game.cameraDepth) %
+            this.game.road.segmentGap) / this.game.road.segmentGap,
+            segment = this.game.road.findSegment(this.mileage + this.game.cameraDepth);
+        this.offsetY = segment.p1.world.y + (segment.p2.world.y - segment.p1.world.y) * percent;
+
         return this.mileage;
     },
 
