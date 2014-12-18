@@ -161,12 +161,13 @@ Road.prototype = {
         // 初始化道路分段
         var num = Road.LENGTH.SHORT;
         var height = Road.HILL.LOW;
-        this.addRoad(num, num, num,  0,  height/2);
-        this.addRoad(num, num, num,  0, -height);
-        this.addRoad(num, num, num,  0,  height);
-        this.addRoad(num, num, num,  0,  0);
-        this.addRoad(num, num, num,  0,  height/2);
-        this.addRoad(num, num, num,  0,  0);
+        this.addRoad(num, num, num, 0, height/2);
+        this.addRoad(num, num, num, 0, -height);
+        this.addRoad(num, num, num, 0, height);
+        this.addRoad(num, num, num, 0, 0);
+        this.addRoad(num, num, num, 0, height/2);
+        this.addRoad(num, num, num, 0, 0);
+        this.addRoad(num, num, num, 0, -this._lastY() / this.segmentGap);
         this.trackDistance = this.segments.length * this.segmentGap;
     },
 
