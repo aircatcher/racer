@@ -37,7 +37,7 @@ Racer.prototype = {
         if(!this.background) this.background = {};
         this.background.sky = this.engine.add.image(0, 0, "background-sky");
         this.background.hills = this.engine.add.image(0, 0, "background-hills");
-        this.background.tress = this.engine.add.image(0, 0, "background-trees");
+        this.background.trees = this.engine.add.image(0, 0, "background-trees");
 
         if(!this.key) this.key = {};
         this.key.up = this.engine.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -75,5 +75,8 @@ Racer.prototype = {
     render : function() {
         this.road.render();
         this.car.render();
+        this.background.sky.y = this.car.offsetY * 0.001;
+        this.background.hills.y = this.car.offsetY * 0.002;
+        this.background.trees.y = this.car.offsetY * 0.003;
     }
 };
