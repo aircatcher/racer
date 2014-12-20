@@ -75,8 +75,8 @@ Racer.prototype = {
     render : function() {
         this.road.render();
         this.car.render();
-        this.background.sky.y = this.car.offsetY * 0.001;
-        this.background.hills.y = this.car.offsetY * 0.002;
-        this.background.trees.y = this.car.offsetY * 0.003;
+        this.background.sky.y = -this.car.offsetY * 0.02;
+        this.background.hills.y = -this.car.offsetY * 0.03;
+        this.background.trees.y = -this.car.offsetY * 0.04;
     }
 };
