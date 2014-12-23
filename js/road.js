@@ -171,13 +171,14 @@ Road.prototype = {
         this.trackDistance = this.segments.length * this.segmentGap;
     },
 
-    addSegment : function(y) {
+    addSegment : function(curve, y) {
         var i = this.segments.length,
             lastY = this._lastY();
         this.segments.push({
             p1 : {world : {y : lastY, z : this.segmentGap * i}, camera : null, screen : null},
             p2 : {world : {y : y, z : this.segmentGap * (i + 1)}, camera : null, screen : null},
-            color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light
+            color : Math.floor(i / this.stripLength) % 2 ? this.colors.dark : this.colors.light,
+            curve : curve
         });
     },
 
@@ -187,13 +188,13 @@ Road.prototype = {
             total = enter + hold + leave,
             i;
         for(i = 0; i < enter; i++) {
-            this.addSegment(Road.easeInOut(startY, endY, i / total));
+            this.addSegment(Road.easeIn(0, curve, i / enter), Road.easeInOut(startY, endY, i / total));
         }
         for(i = 0; i < hold; i++) {
-            this.addSegment(Road.easeInOut(startY, endY, (enter + i) / total));
+            this.addSegment(curve, Road.easeInOut(startY, endY, (enter + i) / total));
         }
         for(i = 0; i < leave; i++) {
-            this.addSegment(Road.easeInOut(startY, endY, (enter + hold + i) / total));
+            this.addSegment(Road.easeInOut(curve, 0, i / leave), Road.easeInOut(startY, endY, (enter + hold + i) / total));
         }
     },
 
@@ -209,4 +210,8 @@ Road.CURVE = {NONE : 0, EASY : 2, MEDIUM : 4, HARD : 6};
 
 Road.easeInOut = function(a, b, percent) {
     return a + (b - a) * ((-Math.cos(percent * Math.PI) / 2) + 0.5);
+};
+
+Road.easeIn = function(a, b, percent) {
+    return a + (b - a) * Math.pow(percent, 2);
 };
