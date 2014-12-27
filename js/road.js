@@ -141,12 +141,11 @@ Road.prototype = {
         ctx.fill();
     },
 
-    project : function(p, looped) {
-        var camera = this.game.pseudo3DCamera;
+    project2 : function(p, cameraX, cameraY, cameraZ) {
         p.camera = {
-            x : (p.world.x || 0) - (camera.x + this.game.car.offsetX),
-            y : (p.world.y || 0) - (camera.y + this.game.car.offsetY),
-            z : (p.world.z || 0) - (camera.z + this.game.car.mileage - (looped ? this.trackDistance : 0))
+            x : (p.world.x || 0) - cameraX,
+            y : (p.world.y || 0) - cameraY,
+            z : (p.world.z || 0) - cameraZ
         };
 
         var rate = this.game.cameraDepth / p.camera.z;
@@ -156,6 +155,22 @@ Road.prototype = {
             w : Math.round(rate * this.width)
         };
     },
+
+    // project : function(p, looped) {
+    //     var camera = this.game.pseudo3DCamera;
+    //     p.camera = {
+    //         x : (p.world.x || 0) - (camera.x + this.game.car.offsetX),
+    //         y : (p.world.y || 0) - (camera.y + this.game.car.offsetY),
+    //         z : (p.world.z || 0) - (camera.z + this.game.car.mileage - (looped ? this.trackDistance : 0))
+    //     };
+
+    //     var rate = this.game.cameraDepth / p.camera.z;
+    //     p.screen = {
+    //         x : Math.round(this.game.resolution.x / 2 + rate * p.camera.x),
+    //         y : Math.round(this.game.resolution.y / 2 - rate * p.camera.y),
+    //         w : Math.round(rate * this.width)
+    //     };
+    // },
 
     setRoad : function() {
         // 初始化道路分段
