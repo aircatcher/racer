@@ -1,17 +1,10 @@
-var connect = require("connect"),
-    path = require("path");
+var connect = require('connect'),
+	morgan = require('morgan'),
+	serveStatic = require('serve-static'),
+	nPath = require('path'),
+	app = connect(),
+	staticDir = nPath.join(process.cwd(), process.argv[2]);
 
-var wwwPath = process.argv[2],
-    host = connect().use(connect.logger('dev'));
+app.use(morgan()).use(serveStatic(staticDir)).listen(80);
 
-if(!wwwPath) {
-    console.log("Please input wwwPath!");
-    return;
-}
-wwwPath = path.join(process.cwd(), wwwPath);
-
-host.use( connect.static(wwwPath) )
-    .use( connect.vhost("www.kamliao.com", host) )
-    .listen(80);
-
-console.log("host " + wwwPath + " at 127.0.0.1:80");
+console.log("host " + staticDir + " at 127.0.0.1:80");

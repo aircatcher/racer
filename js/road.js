@@ -36,9 +36,9 @@ Road.prototype = {
         this.bitmap.ctx.clearRect(0, 0, this.game.resolution.x, this.game.resolution.y);
 
         var base = this.findSegmentIndex(this.game.pseudo3DCamera.z + this.game.car.mileage),
-            maxy = this.game.resolution.y;
-
-        var arr = [];
+            maxy = this.game.resolution.y,
+            pseudo3DCamera = this.game.pseudo3DCamera,
+            car = this.game.car;
 
         for(var i = 0; i < this.segments.length; i++) {
             var cur = (base + i) % this.segments.length,
@@ -47,12 +47,12 @@ Road.prototype = {
                 p2 = segment.p2,
                 looped = cur < base;
 
-            this.project(p1, looped);
-            this.project(p2, looped);
+            this.project(p1, pseudo3DCamera.x + car.offsetX, pseudo3DCamera.y + car.offsetY,
+                pseudo3DCamera.z + (looped ? car.mileage - this.trackDistance : car.mileage));
+            this.project(p2, pseudo3DCamera.x + car.offsetX, pseudo3DCamera.y + car.offsetY,
+                pseudo3DCamera.z + (looped ? car.mileage - this.trackDistance : car.mileage));
 
             if(p2.screen.y >= maxy) continue;
-
-            arr.push(i);
 
             var rw1 = this.rumbleWidth(p1.screen.w),
                 rw2 = this.rumbleWidth(p2.screen.w);
@@ -141,7 +141,7 @@ Road.prototype = {
         ctx.fill();
     },
 
-    project2 : function(p, cameraX, cameraY, cameraZ) {
+    project : function(p, cameraX, cameraY, cameraZ) {
         p.camera = {
             x : (p.world.x || 0) - cameraX,
             y : (p.world.y || 0) - cameraY,
@@ -155,22 +155,6 @@ Road.prototype = {
             w : Math.round(rate * this.width)
         };
     },
-
-    // project : function(p, looped) {
-    //     var camera = this.game.pseudo3DCamera;
-    //     p.camera = {
-    //         x : (p.world.x || 0) - (camera.x + this.game.car.offsetX),
-    //         y : (p.world.y || 0) - (camera.y + this.game.car.offsetY),
-    //         z : (p.world.z || 0) - (camera.z + this.game.car.mileage - (looped ? this.trackDistance : 0))
-    //     };
-
-    //     var rate = this.game.cameraDepth / p.camera.z;
-    //     p.screen = {
-    //         x : Math.round(this.game.resolution.x / 2 + rate * p.camera.x),
-    //         y : Math.round(this.game.resolution.y / 2 - rate * p.camera.y),
-    //         w : Math.round(rate * this.width)
-    //     };
-    // },
 
     setRoad : function() {
         // 初始化道路分段
