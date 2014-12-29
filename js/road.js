@@ -197,6 +197,20 @@ Road.prototype = {
         }
     },
 
+    addStraight : function() {},
+
+    addHill : function() {},
+
+    addCurve : function() {},
+
+    addLowRollingHills : function() {},
+
+    addDownhillToEnd : function() {},
+
+    addSCurves : function() {},
+
+    addBumps : function() {},
+
     _lastY : function() {
         var i = this.segments.length;
         return i === 0 ? 0 : this.segments[i - 1].p2.world.y;
