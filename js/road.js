@@ -197,19 +197,58 @@ Road.prototype = {
         }
     },
 
-    addStraight : function() {},
+    addStraight : function(num) {
+        num = num || ROAD.LENGTH.MEDIUM;
+        this.addRoad(num, num, num, 0, 0);
+    },
 
-    addHill : function() {},
+    addHill : function(num, height) {
+        num = num || ROAD.LENGTH.MEDIUM;
+        height = height || ROAD.HILL.MEDIUM;
+        this.addRoad(num, num, num, 0, height);
+    },
 
-    addCurve : function() {},
+    addCurve : function(num, curve, height) {
+        num = num || ROAD.LENGTH.MEDIUM;
+        curve = curve || ROAD.CURVE.MEDIUM;
+        height = height || ROAD.HILL.NONE;
+        this.addRoad(num, num, num, curve, height);
+    },
 
-    addLowRollingHills : function() {},
+    addLowRollingHills : function() {
+        num = num || ROAD.LENGTH.SHORT;
+        height = height || ROAD.HILL.LOW;
+        this.addRoad(num, num, num, 0, height/2);
+        this.addRoad(num, num, num, 0, -height);
+        this.addRoad(num, num, num, ROAD.CURVE.EASY, height);
+        this.addRoad(num, num, num, 0, 0);
+        this.addRoad(num, num, num, -ROAD.CURVE.EASY, height/2);
+        this.addRoad(num, num, num, 0, 0);
+    },
 
-    addDownhillToEnd : function() {},
+    addDownhillToEnd : function() {
+        num = num || 200;
+        this.addRoad(num, num, num, -ROAD.CURVE.EASY, -lastY() / segmentGap);
+    },
 
-    addSCurves : function() {},
+    addSCurves : function() {
+        this.addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.EASY, ROAD.HILL.NONE);
+        this.addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.CURVE.MEDIUM, ROAD.HILL.MEDIUM);
+        this.addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.CURVE.EASY, -ROAD.HILL.LOW);
+        this.addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.EASY, ROAD.HILL.MEDIUM);
+        this.addRoad(ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, ROAD.LENGTH.MEDIUM, -ROAD.CURVE.MEDIUM, -ROAD.HILL.MEDIUM);
+    },
 
-    addBumps : function() {},
+    addBumps : function() {
+        this.addRoad(10, 10, 10, 0, 5);
+        this.addRoad(10, 10, 10, 0, -2);
+        this.addRoad(10, 10, 10, 0, -5);
+        this.addRoad(10, 10, 10, 0, 8);
+        this.addRoad(10, 10, 10, 0, 5);
+        this.addRoad(10, 10, 10, 0, -7);
+        this.addRoad(10, 10, 10, 0, 5);
+        this.addRoad(10, 10, 10, 0, -2);
+    },
 
     _lastY : function() {
         var i = this.segments.length;
